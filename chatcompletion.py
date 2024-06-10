@@ -8,6 +8,10 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
+!pip install databricks-genai-inference
+
+# COMMAND ----------
+
 from databricks_genai_inference import ChatCompletion
 
 
