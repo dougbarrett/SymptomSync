@@ -365,6 +365,65 @@ print("SQL INSERT statements have been generated and saved to 'insert_statements
 
 # COMMAND ----------
 
+from faker import Faker
+import random
+
+# Initialize the Faker library
+fake = Faker()
+
+# Define a function to generate fake data
+def generate_fake_data(num_records=1000):
+    specialties = ['Oncology', 'Cardiology', 'Neurology', 'Orthopedics', 'Dermatology']
+    body_parts = ['Lung', 'Heart', 'Brain', 'Knee', 'Skin']
+    diseases_symptoms = {
+        'Lung Cancer': ['headaches', 'loss of appetite', 'coughing'],
+        'Heart Disease': ['chest pain', 'shortness of breath', 'fatigue'],
+        'Alzheimer\'s': ['memory loss', 'confusion', 'difficulty speaking'],
+        'Arthritis': ['joint pain', 'stiffness', 'swelling'],
+        'Eczema': ['itching', 'rashes', 'dry skin']
+    }
+    
+    data = []
+    for _ in range(num_records):
+        patient_name = fake.first_name().replace("'", "")
+        zipcode = fake.zipcode()
+        specialty = random.choice(specialties)
+        body_part = random.choice(body_parts)
+        disease = random.choice(list(diseases_symptoms.keys()))
+        symptoms = ', '.join(random.sample(diseases_symptoms[disease], k=2))  # Randomly pick 2 symptoms
+        
+        data.append([patient_name, zipcode, specialty, body_part, disease, symptoms])
+    
+    return data
+
+# Generate sample data
+sample_data = generate_fake_data(1000)
+
+# Define column headers
+columns = ['Patientname', 'zipcode', 'treatingdoctorspecialty', 'bodypartwithissue', 'Disease', 'symptom']
+
+# Generate SQL INSERT statements
+insert_statements = []
+table_name = 'patients'
+for record in sample_data:
+    values = "', '".join(map(str, record))
+    insert_statement = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ('{values}');"
+    insert_statements.append(insert_statement)
+
+# Print SQL INSERT statements
+for statement in insert_statements:
+    print(statement)
+
+# Optional: Save to a file
+with open('insert_statements_1.sql', 'w') as file:
+    for statement in insert_statements:
+        file.write(statement + '\n')
+
+print("SQL INSERT statements have been generated and saved to 'insert_statements_1.sql'.")
+
+
+# COMMAND ----------
+
 # MAGIC %sql
 # MAGIC INSERT INTO patients (Patientname, zipcode, treatingdoctorspecialty, bodypartwithissue, Disease, symptom) VALUES ('Bruce', '89621', 'Cardiology', 'Skin', 'Eczema', 'dry skin, rashes');
 

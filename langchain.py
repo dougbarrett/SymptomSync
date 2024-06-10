@@ -47,7 +47,7 @@ def transform_input(**request):
   return request
 
 llm = Databricks(endpoint_name="databricks-dbrx-instruct", transform_input_fn=transform_input)
-llm("add 44845+ 38")
+llm("What is a mixture of experts model?")
 
 
 # COMMAND ----------
