@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %sql
+# MAGIC select * from patients;
+
+# COMMAND ----------
+
 Can you create sample data for database of patients with a particular disease and symptoms. Rules - 1. A patient can have one more than one disease. Each disease need to be categorized into one record.
 2. Main goal is to know various symptoms observed by patient with comma separated value in same row.
 Use below data as sample data for creating around 100 records with above rules. Below data contains first record as column headers and second record as sample data - 
@@ -426,6 +431,74 @@ print("SQL INSERT statements have been generated and saved to 'insert_statements
 
 # MAGIC %sql
 # MAGIC INSERT INTO patients (Patientname, zipcode, treatingdoctorspecialty, bodypartwithissue, Disease, symptom) VALUES ('Bruce', '89621', 'Cardiology', 'Skin', 'Eczema', 'dry skin, rashes');
+
+# COMMAND ----------
+
+from faker import Faker
+import random
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, StringType
+
+# Initialize the Faker library
+fake = Faker()
+
+# Define a function to generate fake data
+def generate_fake_data(num_records=1000):
+    specialties = ['Oncology', 'Cardiology', 'Neurology', 'Orthopedics', 'Dermatology']
+    body_parts = ['Lung', 'Heart', 'Brain', 'Knee', 'Skin']
+    diseases_symptoms = {
+        'Lung Cancer': ['headaches', 'loss of appetite', 'coughing'],
+        'Heart Disease': ['chest pain', 'shortness of breath', 'fatigue'],
+        'Alzheimer\'s': ['memory loss', 'confusion', 'difficulty speaking'],
+        'Arthritis': ['joint pain', 'stiffness', 'swelling'],
+        'Eczema': ['itching', 'rashes', 'dry skin']
+    }
+    
+    data = []
+    for _ in range(num_records):
+        patient_name = fake.first_name().replace("'", "")
+        zipcode = fake.zipcode()
+        specialty = random.choice(specialties)
+        body_part = random.choice(body_parts)
+        disease = random.choice(list(diseases_symptoms.keys()))
+        symptoms = ', '.join(random.sample(diseases_symptoms[disease], k=2))  # Randomly pick 2 symptoms
+        
+        data.append((patient_name, zipcode, specialty, body_part, disease, symptoms))
+    
+    return data
+
+# Generate sample data
+sample_data = generate_fake_data(1000)
+
+# Define column headers
+columns = ['Patientname', 'zipcode', 'treatingdoctorspecialty', 'bodypartwithissue', 'Disease', 'symptom']
+
+# Create Spark session
+spark = SparkSession.builder \
+    .appName("Patient Data Insertion") \
+    .getOrCreate()
+
+# Define schema
+schema = StructType([
+    StructField("Patientname", StringType(), True),
+    StructField("zipcode", StringType(), True),
+    StructField("treatingdoctorspecialty", StringType(), True),
+    StructField("bodypartwithissue", StringType(), True),
+    StructField("Disease", StringType(), True),
+    StructField("symptom", StringType(), True)
+])
+
+# Create DataFrame
+df = spark.createDataFrame(sample_data, schema)
+
+# Show the DataFrame
+df.show()
+
+# Append DataFrame to the existing table
+df.write.mode('append').saveAsTable('patients')
+
+print("Data has been successfully appended to the patients table.")
+
 
 # COMMAND ----------
 

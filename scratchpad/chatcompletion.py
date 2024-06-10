@@ -21,3 +21,13 @@ response = ChatCompletion.create(model="databricks-dbrx-instruct",
                                 max_tokens=128)
 print(f"response.message:{response.message}")
 
+
+# COMMAND ----------
+
+# MAGIC %run ./functions_notebook
+
+# COMMAND ----------
+
+res = query_zipcodeSymptom(spark, "12345", "cough")
+
+display(res)

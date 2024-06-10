@@ -53,7 +53,7 @@ dbutils.library.restartPython()
 # COMMAND ----------
 
 # Select the model from the dropdown list
-model_names = ['bge_base_en_v1_5']
+model_names = ['bge_base_en_v1_5', 'doug']
 dbutils.widgets.dropdown("model_name", model_names[0], model_names)
 
 # COMMAND ----------
